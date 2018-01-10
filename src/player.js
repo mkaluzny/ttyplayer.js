@@ -130,6 +130,22 @@ export default class TTYPlayer extends Component {
       }
     })
   }
+  loadData(data) {
+
+    let frames
+    try {
+      frames = decode(data)
+    } catch (err) {
+      console.error(err)
+      return this.emit('loadError', err)
+    }
+
+    this._frames = frames
+    if (this.options.autoplay) {
+      this.play()
+    }
+  }
+
 
   destroy() {
     this.player.destroy()
