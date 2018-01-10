@@ -248,7 +248,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var frames = void 0;
 	    try {
-	      frames = (0, _decode2.default)(data);
+	      frames = (0, _decode2.default)((0, _utils.stringToArrayBuffer)(data));
 	    } catch (err) {
 	      console.error(err);
 	      return this.emit('loadError', err);
@@ -274,7 +274,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = TTYPlayer;
 
 
-	TTYPlayer.VERSION = ('0.2.3');
+	TTYPlayer.VERSION = ('0.2.4');
 	TTYPlayer.Core = _playerCore2.default;
 	TTYPlayer.Terminal = _playerCore2.default.Terminal;
 
@@ -507,6 +507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isString = isString;
 	exports.assign = assign;
 	exports.readUtf8 = readUtf8;
+	exports.stringToArrayBuffer = stringToArrayBuffer;
 	exports.fetchArrayBuffer = fetchArrayBuffer;
 	exports.element = element;
 	exports.closet = closet;
@@ -541,6 +542,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return decodeURIComponent(escape(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer, start, length))));
 	}
 
+	function stringToArrayBuffer(str) {
+	  var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+	  var bufView = new Uint16Array(buf);
+	  for (var i = 0, strLen = str.length; i < strLen; i++) {
+	    bufView[i] = str.charCodeAt(i);
+	  }
+	  return buf;
+	}
 	/**
 	 * @param {string} url
 	 * @param {function} callback
