@@ -4,7 +4,7 @@ import Core from './player-core'
 import Select from './select'
 import Component from './component'
 import decode from './decode'
-import {element as $, assign, fetchArrayBuffer, replaceTpl, stringToArrayBuffer} from './utils'
+import {element as $, assign, fetchArrayBuffer, replaceTpl} from './utils'
 import template from './player.htm'
 
 const defaultCols = 80
@@ -130,22 +130,6 @@ export default class TTYPlayer extends Component {
       }
     })
   }
-  loadData(data) {
-
-    let frames
-    try {
-      frames = decode(stringToArrayBuffer(data))
-    } catch (err) {
-      console.error(err)
-      return this.emit('loadError', err)
-    }
-
-    this._frames = frames
-    if (this.options.autoplay) {
-      this.play()
-    }
-  }
-
 
   destroy() {
     this.player.destroy()
