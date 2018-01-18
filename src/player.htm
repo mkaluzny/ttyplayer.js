@@ -1,32 +1,31 @@
 <div class="ttyplayer" ref="container">
-  <header class="ttyplayer-header"><a href="https://meowtec.github.io/ttyplayer.js/" target="_blank">TTYPlayer</a></header>
-  <div class="ttyplayer-body" ref="body"></div>
-  <div class="tty-mask" ref="playMask">
-    <button class="tty-big-play" ref="bigPlayButton"></button>
-  </div>
-  <footer class="ttyplayer-footer {{ ttyfooter }}">
-    <button class="tty-play tty-hide" ref="playButton">
-      <i></i>
-      <span>play</span>
-    </button>
-    <button class="tty-pause tty-hide" ref="pauseButton">
-      <i></i>
-      <span>pause</span>
-    </button>
-    <div class="tty-button-wrap">
-      <div class="tty-select-wrap" ref="speedSelect">
-        <div class="tty-select">
-          <a href="#" data-value="8">8x</a>
-          <a href="#" data-value="4">4x</a>
-          <a href="#" data-value="2">2x</a>
-          <a href="#" data-value="1">1x</a>
-          <a href="#" data-value="0.5">0.5x</a>
-          <a href="#" data-value="0.25">0.25x</a>
+    <header class="ttyplayer-header">
+        <button class="tty-play tty-hide" ref="playButton">
+            <i></i>
+            <span>play</span>
+        </button>
+        <button class="tty-pause tty-hide" ref="pauseButton">
+            <i></i>
+            <span>pause</span>
+        </button>
+        <div class="tty-button-wrap">
+            <div class="tty-select-wrap" ref="speedSelect">
+                <div class="tty-select">
+                    <a href="#" data-value="8">8x</a>
+                    <a href="#" data-value="4">4x</a>
+                    <a href="#" data-value="2">2x</a>
+                    <a href="#" data-value="1">1x</a>
+                    <a href="#" data-value="0.5">0.5x</a>
+                    <a href="#" data-value="0.25">0.25x</a>
+                </div>
+            </div>
+            <button class="tty-speed" ref="speedButton">
+                1x
+            </button>
         </div>
-      </div>
-      <button class="tty-speed" ref="speedButton">
-        1x
-      </button>
+    </header>
+    <div class="ttyplayer-body" ref="body"></div>
+    <div class="tty-mask" ref="playMask">
+        <button class="tty-big-play" ref="bigPlayButton"></button>
     </div>
-  </footer>
 </div>

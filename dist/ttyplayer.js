@@ -300,92 +300,106 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EventEmitter = _xterm2.default.EventEmitter;
 
 	var TTYCorePlayer = function (_EventEmitter) {
-	  _inherits(TTYCorePlayer, _EventEmitter);
+	    _inherits(TTYCorePlayer, _EventEmitter);
 
-	  function TTYCorePlayer(options) {
-	    _classCallCheck(this, TTYCorePlayer);
+	    function TTYCorePlayer(options) {
+	        _classCallCheck(this, TTYCorePlayer);
 
-	    var _this = _possibleConstructorReturn(this, _EventEmitter.call(this));
+	        var _this = _possibleConstructorReturn(this, _EventEmitter.call(this));
 
-	    var term = new _xterm2.default(options);
-	    term.open();
+	        var term = new _xterm2.default(options);
+	        term.open();
 
-	    _this.term = term;
-	    return _this;
-	  }
-
-	  TTYCorePlayer.prototype.atEnd = function atEnd() {
-	    return this.step === this.frames.length;
-	  };
-
-	  TTYCorePlayer.prototype.play = function play(frames) {
-	    if (frames) {
-	      this.frames = frames;
+	        _this.term = term;
+	        return _this;
 	    }
-	    this.term.reset();
-	    this.step = 0;
-	    this.renderFrame();
-	    this.emit('play');
-	  };
 
-	  TTYCorePlayer.prototype.pause = function pause() {
-	    this._nextTimer.pause();
-	    this.emit('pause');
-	  };
+	    TTYCorePlayer.prototype.atEnd = function atEnd() {
+	        return this.step === this.frames.length;
+	    };
 
-	  TTYCorePlayer.prototype.resume = function resume() {
-	    this._nextTimer.resume();
-	    this.emit('play');
-	  };
+	    TTYCorePlayer.prototype.play = function play(frames) {
+	        if (frames) {
+	            this.frames = frames;
+	        }
+	        this.term.reset();
+	        this.step = 0;
+	        this.renderFrame();
+	        this.emit('play');
+	    };
 
-	  TTYCorePlayer.prototype.renderFrame = function renderFrame() {
-	    var step = this.step;
-	    var frames = this.frames;
-	    var currentFrame = frames[step];
-	    var nextFrame = frames[step + 1];
-	    var str = currentFrame.content;
-	    // It seems to be unnecessary and may cause an unexpected behavior.
-	    // So I ignore it.
-	    if (str !== '\x1B[?1h\x1B=') {
-	      this.term.write(str);
-	    }
-	    this.step = step + 1;
+	    TTYCorePlayer.prototype.pause = function pause() {
+	        this._nextTimer.pause();
+	        this.emit('pause');
+	    };
 
-	    this.next(currentFrame, nextFrame);
-	  };
+	    TTYCorePlayer.prototype.resume = function resume() {
+	        this._nextTimer.resume();
+	        this.emit('play');
+	    };
 
-	  TTYCorePlayer.prototype.next = function next(currentFrame, nextFrame) {
-	    var _this2 = this;
+	    TTYCorePlayer.prototype.renderFrame = function renderFrame() {
+	        var step = this.step;
+	        var frames = this.frames;
+	        var currentFrame = frames[step];
+	        var nextFrame = frames[step + 1];
+	        try {
+	            var str = currentFrame.content;
+	            var metadata = /^\x1b%(G|@)\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
+	            if (metadata) {
+	                // utf8 = metadata[1] === "G";
+	                var dimensions = {
+	                    rows: +metadata[2],
+	                    cols: +metadata[3]
+	                };
+	                this.term.resize(dimensions.cols, dimensions.rows);
+	            }
+	            // It seems to be unnecessary and may cause an unexpected behavior.
+	            // So I ignore it.
+	            else if (str !== '\x1B[?1h\x1B=') {
+	                    this.term.write(str);
+	                }
 
-	    if (nextFrame) {
-	      this._nextTimer = new _timer2.default(function (_) {
-	        return _this2.renderFrame();
-	      }, nextFrame.time - currentFrame.time, this.speed);
-	    } else if (this.repeat) {
-	      this._nextTimer = new _timer2.default(function (_) {
-	        return _this2.play();
-	      }, this.interval, this.speed);
-	    } else {
-	      this.emit('end');
-	    }
-	  };
+	            this.step = step + 1;
+	        } catch (e) {
+	            console.log("Error while rendering frame", e);
+	        }
 
-	  TTYCorePlayer.prototype.destroy = function destroy() {
-	    this.term.destroy();
-	    this.removeAllListeners();
-	    this._nextTimer && this._nextTimer.clear();
-	  };
+	        this.next(currentFrame, nextFrame);
+	    };
 
-	  return TTYCorePlayer;
+	    TTYCorePlayer.prototype.next = function next(currentFrame, nextFrame) {
+	        var _this2 = this;
+
+	        if (nextFrame) {
+	            this._nextTimer = new _timer2.default(function (_) {
+	                return _this2.renderFrame();
+	            }, nextFrame.time - currentFrame.time, this.speed);
+	        } else if (this.repeat) {
+	            this._nextTimer = new _timer2.default(function (_) {
+	                return _this2.play();
+	            }, this.interval, this.speed);
+	        } else {
+	            this.emit('end');
+	        }
+	    };
+
+	    TTYCorePlayer.prototype.destroy = function destroy() {
+	        this.term.destroy();
+	        this.removeAllListeners();
+	        this._nextTimer && this._nextTimer.clear();
+	    };
+
+	    return TTYCorePlayer;
 	}(EventEmitter);
 
 	exports.default = TTYCorePlayer;
 
 
 	(0, _utils.assign)(TTYCorePlayer.prototype, {
-	  speed: 1,
-	  repeat: true,
-	  interval: 3000
+	    speed: 1,
+	    repeat: true,
+	    interval: 3000
 	});
 
 	TTYCorePlayer.Terminal = _xterm2.default;
@@ -6041,7 +6055,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"ttyplayer\" ref=\"container\">\n<header class=\"ttyplayer-header\"><a href=\"https://meowtec.github.io/ttyplayer.js/\" target=\"_blank\">TTYPlayer</a></header>\n<div class=\"ttyplayer-body\" ref=\"body\"></div>\n<div class=\"tty-mask\" ref=\"playMask\">\n<button class=\"tty-big-play\" ref=\"bigPlayButton\"></button>\n</div>\n<footer class=\"ttyplayer-footer {{ ttyfooter }}\">\n<button class=\"tty-play tty-hide\" ref=\"playButton\">\n<i></i>\n<span>play</span>\n</button>\n<button class=\"tty-pause tty-hide\" ref=\"pauseButton\">\n<i></i>\n<span>pause</span>\n</button>\n<div class=\"tty-button-wrap\">\n<div class=\"tty-select-wrap\" ref=\"speedSelect\">\n<div class=\"tty-select\">\n<a href=\"#\" data-value=\"8\">8x</a>\n<a href=\"#\" data-value=\"4\">4x</a>\n<a href=\"#\" data-value=\"2\">2x</a>\n<a href=\"#\" data-value=\"1\">1x</a>\n<a href=\"#\" data-value=\"0.5\">0.5x</a>\n<a href=\"#\" data-value=\"0.25\">0.25x</a>\n</div>\n</div>\n<button class=\"tty-speed\" ref=\"speedButton\">\n1x\n</button>\n</div>\n</footer>\n</div>\n"
+	module.exports = "<div class=\"ttyplayer\" ref=\"container\">\n<header class=\"ttyplayer-header\">\n<button class=\"tty-play tty-hide\" ref=\"playButton\">\n<i></i>\n<span>play</span>\n</button>\n<button class=\"tty-pause tty-hide\" ref=\"pauseButton\">\n<i></i>\n<span>pause</span>\n</button>\n<div class=\"tty-button-wrap\">\n<div class=\"tty-select-wrap\" ref=\"speedSelect\">\n<div class=\"tty-select\">\n<a href=\"#\" data-value=\"8\">8x</a>\n<a href=\"#\" data-value=\"4\">4x</a>\n<a href=\"#\" data-value=\"2\">2x</a>\n<a href=\"#\" data-value=\"1\">1x</a>\n<a href=\"#\" data-value=\"0.5\">0.5x</a>\n<a href=\"#\" data-value=\"0.25\">0.25x</a>\n</div>\n</div>\n<button class=\"tty-speed\" ref=\"speedButton\">\n1x\n</button>\n</div>\n</header>\n<div class=\"ttyplayer-body\" ref=\"body\"></div>\n<div class=\"tty-mask\" ref=\"playMask\">\n<button class=\"tty-big-play\" ref=\"bigPlayButton\"></button>\n</div>\n</div>\n"
 
 /***/ })
 /******/ ])
