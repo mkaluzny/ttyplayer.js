@@ -56,6 +56,9 @@ export default class TTYCorePlayer extends EventEmitter {
     renderFrame() {
         const step = this.step
         const frames = this.frames
+        if (!frames) {
+            return;
+        }
         const currentFrame = frames[step]
         const nextFrame = frames[step + 1]
         try {
