@@ -28,6 +28,21 @@ export default class TTYCorePlayer extends EventEmitter {
         this.emit('play')
     }
 
+    jumpTo(nextStep) {
+        this._nextTimer.pause()
+        let currentStep = this.step
+        this.step = nextStep
+
+        if (nextStep < currentStep) {
+            currentStep = 0
+        }
+        this._nextTimer = new Timer(
+            _ => this.renderFrame(),
+            1,
+            this.speed
+        )
+    }
+
     pause() {
         this._nextTimer.pause()
         this.emit('pause')
@@ -64,7 +79,7 @@ export default class TTYCorePlayer extends EventEmitter {
         } catch (e) {
             console.log("Error while rendering frame", e);
         }
-
+        this.emit('renderFrame')
         this.next(currentFrame, nextFrame)
     }
 

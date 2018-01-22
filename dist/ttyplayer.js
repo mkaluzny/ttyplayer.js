@@ -107,6 +107,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defaultCols = 80;
 	var defaultRows = 20;
 	var hideClass = 'tty-hide';
+	var jumping = false;
 
 	var TTYPlayer = function (_Component) {
 	  _inherits(TTYPlayer, _Component);
@@ -129,6 +130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this.bindEvent();
 
 	    _this.set('isPlaying', false);
+
 	    return _this;
 	  }
 
@@ -186,8 +188,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.refs.bigPlayButton.addEventListener('click', this.resumePlay);
 	    this.refs.playButton.addEventListener('click', this.resumePlay);
 	    this.refs.pauseButton.addEventListener('click', this.pause);
+	    this.refs.progressBar.addEventListener('change', function (evt) {
+	      if (!jumping) {
+	        jumping = true;
+	        var jumpTo = parseInt(_this3.refs.progressBar.value);
+	        _this3.player.jumpTo(jumpTo);
+	        jumping = false;
+	      }
+	    });
 
+	    this.player.on('renderFrame', function () {
+	      if (!jumping) {
+	        _this3.refs.progressBar.value = _this3.player.step;
+	      }
+	    });
 	    this.player.on('play', function () {
+	      if (_this3.player.frames) {
+	        _this3.refs.progressBar.max = _this3.player.frames.length;
+	      } else {
+	        _this3.refs.progressBar.max = 0;
+	      }
 	      _this3.set('isPlaying', true);
 	    });
 
@@ -328,6 +348,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.emit('play');
 	    };
 
+	    TTYCorePlayer.prototype.jumpTo = function jumpTo(nextStep) {
+	        var _this2 = this;
+
+	        this._nextTimer.pause();
+	        var currentStep = this.step;
+	        this.step = nextStep;
+
+	        if (nextStep < currentStep) {
+	            currentStep = 0;
+	        }
+	        this._nextTimer = new _timer2.default(function (_) {
+	            return _this2.renderFrame();
+	        }, 1, this.speed);
+	    };
+
 	    TTYCorePlayer.prototype.pause = function pause() {
 	        this._nextTimer.pause();
 	        this.emit('pause');
@@ -364,20 +399,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } catch (e) {
 	            console.log("Error while rendering frame", e);
 	        }
-
+	        this.emit('renderFrame');
 	        this.next(currentFrame, nextFrame);
 	    };
 
 	    TTYCorePlayer.prototype.next = function next(currentFrame, nextFrame) {
-	        var _this2 = this;
+	        var _this3 = this;
 
 	        if (nextFrame) {
 	            this._nextTimer = new _timer2.default(function (_) {
-	                return _this2.renderFrame();
+	                return _this3.renderFrame();
 	            }, nextFrame.time - currentFrame.time, this.speed);
 	        } else if (this.repeat) {
 	            this._nextTimer = new _timer2.default(function (_) {
-	                return _this2.play();
+	                return _this3.play();
 	            }, this.interval, this.speed);
 	        } else {
 	            this.emit('end');
@@ -6055,7 +6090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"ttyplayer\" ref=\"container\">\n<header class=\"ttyplayer-header\">\n<button class=\"tty-play tty-hide\" ref=\"playButton\">\n<i></i>\n<span>play</span>\n</button>\n<button class=\"tty-pause tty-hide\" ref=\"pauseButton\">\n<i></i>\n<span>pause</span>\n</button>\n<div class=\"tty-button-wrap\">\n<div class=\"tty-select-wrap\" ref=\"speedSelect\">\n<div class=\"tty-select\">\n<a href=\"#\" data-value=\"8\">8x</a>\n<a href=\"#\" data-value=\"4\">4x</a>\n<a href=\"#\" data-value=\"2\">2x</a>\n<a href=\"#\" data-value=\"1\">1x</a>\n<a href=\"#\" data-value=\"0.5\">0.5x</a>\n<a href=\"#\" data-value=\"0.25\">0.25x</a>\n</div>\n</div>\n<button class=\"tty-speed\" ref=\"speedButton\">\n1x\n</button>\n</div>\n</header>\n<div class=\"ttyplayer-body\" ref=\"body\"></div>\n<div class=\"tty-mask\" ref=\"playMask\">\n<button class=\"tty-big-play\" ref=\"bigPlayButton\"></button>\n</div>\n</div>\n"
+	module.exports = "<div class=\"ttyplayer\" ref=\"container\">\n<header class=\"ttyplayer-header\">\n<button class=\"tty-play tty-hide\" ref=\"playButton\">\n<i></i>\n<span>play</span>\n</button>\n<button class=\"tty-pause tty-hide\" ref=\"pauseButton\">\n<i></i>\n<span>pause</span>\n</button>\n<input type=\"range\" min=\"0\" max=\"100\" step=\"1\" ref=\"progressBar\">\n<div class=\"tty-button-wrap\">\n<div class=\"tty-select-wrap\" ref=\"speedSelect\">\n<div class=\"tty-select\">\n<a href=\"#\" data-value=\"8\">8x</a>\n<a href=\"#\" data-value=\"4\">4x</a>\n<a href=\"#\" data-value=\"2\">2x</a>\n<a href=\"#\" data-value=\"1\">1x</a>\n<a href=\"#\" data-value=\"0.5\">0.5x</a>\n<a href=\"#\" data-value=\"0.25\">0.25x</a>\n</div>\n</div>\n<button class=\"tty-speed\" ref=\"speedButton\">\n1x\n</button>\n</div>\n</header>\n<div class=\"ttyplayer-body\" ref=\"body\"></div>\n<div class=\"tty-mask\" ref=\"playMask\">\n<button class=\"tty-big-play\" ref=\"bigPlayButton\"></button>\n</div>\n</div>\n"
 
 /***/ })
 /******/ ])

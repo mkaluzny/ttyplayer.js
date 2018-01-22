@@ -14,60 +14,13 @@
 }
 
 .ttyplayer-header {
-  text-align: center;
-  padding: 3px;
-  background: #222;
-  color: #fff;
-}
-
-.ttyplayer-body {
-  padding: 5px;
-  background: #000;
-}
-
-.tty-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, .4);
-}
-
-.tty-big-play {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  left: 50%;
-  top: 50%;
-  margin-left: -30px;
-  margin-top: -30px;
-  border-radius: 100px;
-  border: 0;
-  background: rgba(0, 0, 0, .3);
-  color: #fff;
-  outline: none;
-  cursor: pointer;
-
-  &:after {
-    position: absolute;
-    content: '';
-    display: block;
-    border: solid transparent;
-    border-left-color: currentColor;
-    border-width: 8px 12px;
-    left: 50%;
-    top: 50%;
-    margin-top: -6px;
-    margin-left: -4px;
-  }
-}
-
-.ttyplayer-footer {
   background: #000;
   color: #999;
-  text-align: right;
   padding: 0 5px;
+  display: flex;
+  input {
+    flex: 1;
+  }
 
   button {
     position: relative;
@@ -87,6 +40,7 @@
     &.tty-play,
     &.tty-pause {
       width: 60px;
+      flex: 0 1 auto;
     }
 
     > i {
@@ -131,6 +85,9 @@
   .tty-button-wrap {
     position: relative;
     display: inline-block;
+    button {
+      height: 100%;
+    }
   }
 
   .tty-select-wrap {
@@ -158,4 +115,51 @@
     bottom: 0;
     right: 0;
   }
+
+}
+
+.ttyplayer-body {
+  padding: 5px;
+  background: #000;
+}
+
+.tty-mask {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, .4);
+}
+
+.tty-big-play {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  left: 50%;
+  top: 50%;
+  margin-left: -30px;
+  margin-top: -30px;
+  border-radius: 100px;
+  border: 0;
+  background: rgba(0, 0, 0, .3);
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+
+  &:after {
+    position: absolute;
+    content: '';
+    display: block;
+    border: solid transparent;
+    border-left-color: currentColor;
+    border-width: 8px 12px;
+    left: 50%;
+    top: 50%;
+    margin-top: -6px;
+    margin-left: -4px;
+  }
+}
+
+.ttyplayer-footer {
 }

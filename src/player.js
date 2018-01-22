@@ -10,6 +10,7 @@ import template from './player.htm'
 const defaultCols = 80
 const defaultRows = 20
 const hideClass = 'tty-hide'
+let jumping = false
 
 export default class TTYPlayer extends Component {
   constructor(options) {
@@ -28,6 +29,7 @@ export default class TTYPlayer extends Component {
     this.bindEvent()
 
     this.set('isPlaying', false)
+
   }
 
   onChange(key, value) {
@@ -75,8 +77,27 @@ export default class TTYPlayer extends Component {
     this.refs.bigPlayButton.addEventListener('click', this.resumePlay)
     this.refs.playButton.addEventListener('click', this.resumePlay)
     this.refs.pauseButton.addEventListener('click', this.pause)
+    this.refs.progressBar.addEventListener('change', (evt) => {
+        if (!jumping) {
+          jumping = true
+          let jumpTo = parseInt(this.refs.progressBar.value);
+          this.player.jumpTo(jumpTo);
+          jumping = false;
+        }
 
+    })
+
+    this.player.on('renderFrame', () => {
+        if (!jumping) {
+            this.refs.progressBar.value = this.player.step;
+        }
+    })
     this.player.on('play', () => {
+      if (this.player.frames) {
+          this.refs.progressBar.max = this.player.frames.length
+      } else {
+          this.refs.progressBar.max = 0;
+      }
       this.set('isPlaying', true)
     })
 
