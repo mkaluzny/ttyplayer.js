@@ -376,6 +376,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    TTYCorePlayer.prototype.renderFrame = function renderFrame() {
 	        var step = this.step;
 	        var frames = this.frames;
+	        if (!frames) {
+	            return;
+	        }
 	        var currentFrame = frames[step];
 	        var nextFrame = frames[step + 1];
 	        try {

@@ -35,7 +35,7 @@
 }
 .ttyplayer-header button.tty-play,
 .ttyplayer-header button.tty-pause {
-  width: 60px;
+  width: 75px;
   flex: 0 1 auto;
 }
 .ttyplayer-header button > i {
