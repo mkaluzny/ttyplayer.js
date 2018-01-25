@@ -377,6 +377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var step = this.step;
 	        var frames = this.frames;
 	        if (!frames) {
+	            this.next(null, null);
 	            return;
 	        }
 	        var currentFrame = frames[step];

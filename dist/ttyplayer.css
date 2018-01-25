@@ -82,7 +82,7 @@
 .ttyplayer-header .tty-select {
   position: absolute;
   background: #333;
-  bottom: 0;
+  top: 20px;
   right: 0;
 }
 .ttyplayer-header .tty-select a {
