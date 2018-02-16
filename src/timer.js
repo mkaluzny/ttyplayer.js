@@ -31,11 +31,15 @@ export default class Timer {
   }
 
   _setTimeout(callback, time) {
-    this._timer = setTimeout(() => {
+      let delay = time / this._rate;
+      if (delay >= 500) {
+        delay = 500;
+      }
+      this._timer = setTimeout(() => {
       callback()
       this._finish = true
       this._rest = null
-    }, time / this._rate)
+    }, delay)
 
     this._finish = false
     this._time = time

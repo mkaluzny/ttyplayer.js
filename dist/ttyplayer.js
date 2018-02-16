@@ -278,7 +278,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = TTYPlayer;
 
 
-	TTYPlayer.VERSION = ('0.2.4');
+	TTYPlayer.VERSION = ('0.2.5');
 	TTYPlayer.Core = _playerCore2.default;
 	TTYPlayer.Terminal = _playerCore2.default.Terminal;
 
@@ -470,11 +470,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Timer.prototype._setTimeout = function _setTimeout(callback, time) {
 	    var _this = this;
 
+	    var delay = time / this._rate;
+	    if (delay >= 500) {
+	      delay = 500;
+	    }
 	    this._timer = setTimeout(function () {
 	      callback();
 	      _this._finish = true;
 	      _this._rest = null;
-	    }, time / this._rate);
+	    }, delay);
 
 	    this._finish = false;
 	    this._time = time;
