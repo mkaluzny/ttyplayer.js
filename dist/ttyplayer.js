@@ -552,21 +552,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	var toString = Object.prototype.toString;
 
 	function isArray(arr) {
-	  return toString.call(arr) === '[object Array]';
+	    return toString.call(arr) === '[object Array]';
 	}
 
 	function isString(str) {
-	  return typeof str === 'string';
+	    return typeof str === 'string';
 	}
 
 	function assign(a, b) {
-	  for (var key in b) {
-	    if (hasOwnProperty.call(b, key)) {
-	      a[key] = b[key];
+	    for (var key in b) {
+	        if (hasOwnProperty.call(b, key)) {
+	            a[key] = b[key];
+	        }
 	    }
-	  }
 
-	  return a;
+	    return a;
 	}
 
 	/**
@@ -575,7 +575,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} length
 	 */
 	function readUtf8(arrayBuffer, start, length) {
-	  return decodeURIComponent(escape(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer, start, length))));
+	    try {
+	        var chars = String.fromCharCode.apply(null, new Uint8Array(arrayBuffer, start, length));
+	        return decodeURIComponent(escape(chars));
+	    } catch (e) {
+	        var _chars = String.fromCharCode.apply(null, new Uint8Array(arrayBuffer, start, length));
+	        console.error('Error occurred while decoding characters: ' + _chars, e);
+	        return '.'.repeat(length);
+	    }
 	}
 
 	/**
@@ -583,41 +590,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {function} callback
 	 */
 	function fetchArrayBuffer(url, callback) {
-	  var xhr = new XMLHttpRequest();
-	  xhr.open('GET', url, true);
-	  xhr.responseType = 'arraybuffer';
-	  xhr.withCredentials = true;
-	  xhr.send();
-	  var error = new Error('XMLHttpRequest error.');
-	  xhr.onload = function (_) {
-	    if (!/^2/.test(xhr.status)) {
-	      return callback(error);
-	    }
-	    callback(null, xhr.response);
-	  };
-	  xhr.onerror = function (_) {
-	    return callback(error);
-	  };
+	    var xhr = new XMLHttpRequest();
+	    xhr.open('GET', url, true);
+	    xhr.responseType = 'arraybuffer';
+	    xhr.withCredentials = true;
+	    xhr.send();
+	    var error = new Error('XMLHttpRequest error.');
+	    xhr.onload = function (_) {
+	        if (!/^2/.test(xhr.status)) {
+	            return callback(error);
+	        }
+	        callback(null, xhr.response);
+	    };
+	    xhr.onerror = function (_) {
+	        return callback(error);
+	    };
 	}
 
 	var div = document.createElement('div');
+
 	function element(template) {
-	  div.innerHTML = template;
+	    div.innerHTML = template;
 
-	  var refsElement = div.querySelectorAll('[ref]');
-	  var refs = {};
+	    var refsElement = div.querySelectorAll('[ref]');
+	    var refs = {};
 
-	  for (var i = 0, len = refsElement.length; i < len; i++) {
-	    var node = refsElement[i];
-	    var ref = node.getAttribute('ref');
-	    node.removeAttribute('ref');
-	    refs[ref] = node;
-	  }
+	    for (var i = 0, len = refsElement.length; i < len; i++) {
+	        var node = refsElement[i];
+	        var ref = node.getAttribute('ref');
+	        node.removeAttribute('ref');
+	        refs[ref] = node;
+	    }
 
-	  return {
-	    refs: refs,
-	    element: div.children[0]
-	  };
+	    return {
+	        refs: refs,
+	        element: div.children[0]
+	    };
 	}
 
 	/**
@@ -625,29 +633,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {function(Element): boolean} cond
 	 */
 	function closet(el, cond) {
-	  var elem = el;
+	    var elem = el;
 
-	  while (elem && elem !== document) {
-	    if (cond(elem)) {
-	      return elem;
+	    while (elem && elem !== document) {
+	        if (cond(elem)) {
+	            return elem;
+	        }
+
+	        elem = elem.parentNode;
 	    }
-
-	    elem = elem.parentNode;
-	  }
 	}
 
 	function replaceTpl(str, data) {
-	  var html = str;
-	  for (var key in data) {
-	    if (hasOwnProperty.call(data, key)) {
-	      var value = data[key];
-	      if (value == null) {
-	        value = '';
-	      }
-	      html = html.replace(new RegExp('\\{\\{\\s*' + key + '\\s*\\}\\}', 'g'), value);
+	    var html = str;
+	    for (var key in data) {
+	        if (hasOwnProperty.call(data, key)) {
+	            var value = data[key];
+	            if (value == null) {
+	                value = '';
+	            }
+	            html = html.replace(new RegExp('\\{\\{\\s*' + key + '\\s*\\}\\}', 'g'), value);
+	        }
 	    }
-	  }
-	  return html;
+	    return html;
 	}
 
 /***/ }),
