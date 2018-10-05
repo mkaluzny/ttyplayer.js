@@ -384,12 +384,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var nextFrame = frames[step + 1];
 	        try {
 	            var str = currentFrame.content;
-	            var metadata = /^\x1b%(G|@)\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
+	            var metadata = /^.*\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
 	            if (metadata) {
 	                // utf8 = metadata[1] === "G";
 	                var dimensions = {
-	                    rows: +metadata[2],
-	                    cols: +metadata[3]
+	                    rows: +metadata[1],
+	                    cols: +metadata[2]
 	                };
 	                this.term.resize(dimensions.cols, dimensions.rows);
 	            }
