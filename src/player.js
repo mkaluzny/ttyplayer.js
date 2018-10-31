@@ -13,152 +13,173 @@ const hideClass = 'tty-hide'
 let jumping = false
 
 export default class TTYPlayer extends Component {
-  constructor(options) {
-    super()
+    constructor(options) {
+        super()
 
-    const optionsCopy = assign({}, options)
-    optionsCopy.rows = optionsCopy.rows || defaultRows
-    optionsCopy.cols = optionsCopy.cols || defaultCols
-    optionsCopy.footerStyle = optionsCopy.footerStyle || 'inset'
-    this.options = optionsCopy
+        const optionsCopy = assign({}, options)
+        optionsCopy.rows = optionsCopy.rows || defaultRows
+        optionsCopy.cols = optionsCopy.cols || defaultCols
+        optionsCopy.footerStyle = optionsCopy.footerStyle || 'inset'
+        this.options = optionsCopy
 
-    this.mount(options.parent)
-    this.createCorePlayer()
-    this.delegate()
-    this.createSpeedSelect()
-    this.bindEvent()
+        this.mount(options.parent)
+        this.createCorePlayer()
+        this.delegate()
+        this.createSpeedSelect()
+        this.bindEvent()
 
-    this.set('isPlaying', false)
+        this.set('isPlaying', false)
 
-  }
-
-  onChange(key, value) {
-    if (key === 'isPlaying') {
-      const { playButton, pauseButton, playMask } = this.refs
-      if (value) {
-        playButton.classList.add(hideClass)
-        pauseButton.classList.remove(hideClass)
-        playMask.classList.add(hideClass)
-      } else {
-        playButton.classList.remove(hideClass)
-        pauseButton.classList.add(hideClass)
-        playMask.classList.remove(hideClass)
-      }
-      return
     }
-  }
 
-  mount(parentNode) {
-    const { element, refs } = $(replaceTpl(template, {
-      ttyfooter: 'tty-footer-' + this.options.footerStyle
-    }))
-    parentNode.appendChild(element)
-    this.element = element
-    this.parentNode = parentNode
-    this.options.parent = refs.body
-    this.refs = refs
-  }
-
-  unmount() {
-    this.parentNode.removeChild(this.element)
-  }
-
-  delegate() {
-    const player = this.player
-
-    ;[ 'play', 'resume', 'pause' ].forEach(method => {
-      this[method] = player[method].bind(player)
-    })
-
-    this.resumePlay = this.resumePlay.bind(this)
-  }
-
-  bindEvent() {
-    this.refs.bigPlayButton.addEventListener('click', this.resumePlay)
-    this.refs.playButton.addEventListener('click', this.resumePlay)
-    this.refs.pauseButton.addEventListener('click', this.pause)
-    this.refs.progressBar.addEventListener('change', (evt) => {
-        if (!jumping) {
-          jumping = true
-          let jumpTo = parseInt(this.refs.progressBar.value);
-          this.player.jumpTo(jumpTo);
-          jumping = false;
+    onChange(key, value) {
+        if (key === 'isPlaying') {
+            this._playing = value;
+            const {playButton, pauseButton, playMask} = this.refs
+            if (value) {
+                playButton.classList.add(hideClass)
+                pauseButton.classList.remove(hideClass)
+                playMask.classList.add(hideClass)
+            } else {
+                playButton.classList.remove(hideClass)
+                pauseButton.classList.add(hideClass)
+                playMask.classList.remove(hideClass)
+            }
+            return
         }
-
-    })
-
-    this.player.on('renderFrame', () => {
-        if (!jumping) {
-            this.refs.progressBar.value = this.player.step;
-        }
-    })
-    this.player.on('play', () => {
-      if (this.player.frames) {
-          this.refs.progressBar.max = this.player.frames.length
-      } else {
-          this.refs.progressBar.max = 0;
-      }
-      this.set('isPlaying', true)
-    })
-
-    this.player.on('pause', () => {
-      this.set('isPlaying', false)
-    })
-
-    this.speedSelect.on('change', value => {
-      this.player.speed = value
-    })
-  }
-
-  unbindEvent() {
-    this.refs.playButton.removeEventListener('click', this.resume)
-    this.refs.pauseButton.removeEventListener('click', this.pause)
-  }
-
-  createCorePlayer() {
-    this.player = new Core(this.options)
-  }
-
-  createSpeedSelect() {
-    this.speedSelect = new Select(this.refs.speedButton, this.refs.speedSelect)
-  }
-
-  resumePlay() {
-    if (this._started) {
-      this.resume()
-    } else {
-      this.play(this._frames)
-      this._started = true
     }
-  }
 
-  load(url) {
-    fetchArrayBuffer(url, (err, data) => {
-      if (err) {
-        return this.emit('loadError', err)
-      }
-      let frames
-      try {
-        frames = decode(data)
-      } catch (err) {
-        console.error(err)
-        return this.emit('loadError', err)
-      }
+    mount(parentNode) {
+        const {element, refs} = $(replaceTpl(template, {
+            ttyfooter: 'tty-footer-' + this.options.footerStyle
+        }))
+        parentNode.appendChild(element)
+        this.element = element
+        this.parentNode = parentNode
+        this.options.parent = refs.body
+        this.refs = refs
+    }
 
-      this._frames = frames
-      if (this.options.autoplay) {
-        this.play()
-      }
-    })
-  }
+    unmount() {
+        this.parentNode.removeChild(this.element)
+    }
 
-  destroy() {
-    this.player.destroy()
-    this.speedSelect.destroy()
-    this.unbindEvent()
-    this.removeAllListeners()
-    this.unmount()
-  }
+    delegate() {
+        const player = this.player
+
+        ;['play', 'resume', 'pause'].forEach(method => {
+            this[method] = player[method].bind(player)
+        })
+
+        this.resumePlay = this.resumePlay.bind(this)
+    }
+
+    bindEvent() {
+        this.refs.bigPlayButton.addEventListener('click', this.resumePlay)
+        this.refs.playButton.addEventListener('click', this.resumePlay)
+        this.refs.pauseButton.addEventListener('click', this.pause)
+        this.refs.progressBar.addEventListener('mousedown', (evt) => {
+            jumping = true;
+        });
+        this.refs.progressBar.addEventListener('keydown', (evt) => {
+            jumping = true;
+        });
+        this.refs.progressBar.addEventListener('change', (evt) => {
+            const isPlaying = this._playing;
+            this.set('isPlaying', false);
+
+            let jumpTo = parseInt(this.refs.progressBar.value);
+            this.player.jumpTo(jumpTo);
+            jumping = false;
+            if (isPlaying) {
+                this.resumePlay();
+            }
+        })
+
+        this.player.on('renderFrame', () => {
+            if (!jumping) {
+                this.refs.progressBar.value = this.player.step;
+            }
+        })
+        this.player.on('play', () => {
+            this._setupProgressBar();
+            this.set('isPlaying', true)
+        })
+
+        this.player.on('pause', () => {
+            this.set('isPlaying', false)
+        })
+
+        this.speedSelect.on('change', value => {
+            this.player.speed = value
+        })
+    }
+
+    _setupProgressBar() {
+        if (this.player.frames) {
+            this.refs.progressBar.max = this.player.frames.length
+        } else {
+            this.refs.progressBar.max = 0;
+        }
+    }
+
+    unbindEvent() {
+        this.refs.playButton.removeEventListener('click', this.resume)
+        this.refs.pauseButton.removeEventListener('click', this.pause)
+    }
+
+    createCorePlayer() {
+        this.player = new Core(this.options)
+    }
+
+    createSpeedSelect() {
+        this.speedSelect = new Select(this.refs.speedButton, this.refs.speedSelect)
+    }
+
+    resumePlay() {
+        if (this._started) {
+            this.resume()
+        } else {
+            this.play(this._frames)
+            this._started = true
+        }
+    }
+
+    beforePlay() {
+        this.player.preparePlayer(this._frames);
+        this._setupProgressBar()
+        this.refs.progressBar.value = 0;
+    }
+
+    load(url) {
+        fetchArrayBuffer(url, (err, data) => {
+            if (err) {
+                return this.emit('loadError', err)
+            }
+            let frames
+            try {
+                frames = decode(data)
+            } catch (err) {
+                console.error(err)
+                return this.emit('loadError', err)
+            }
+
+            this._frames = frames
+            if (this.options.autoplay) {
+                this.play()
+            } else {
+                this.beforePlay()
+            }
+        })
+    }
+
+    destroy() {
+        this.player.destroy()
+        this.speedSelect.destroy()
+        this.unbindEvent()
+        this.removeAllListeners()
+        this.unmount()
+    }
 }
 
 TTYPlayer.VERSION = VERSION

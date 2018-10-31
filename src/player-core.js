@@ -18,18 +18,38 @@ export default class TTYCorePlayer extends EventEmitter {
         return this.step === this.frames.length
     }
 
-    play(frames) {
+    preparePlayer(frames) {
         if (frames) {
             this.frames = frames
         }
         this.term.reset()
         this.step = 0
-        this.renderFrame()
-        this.emit('play')
+        this.writeFrame(0)
+    }
+
+    play(frames) {
+        if (frames) {
+            this.frames = frames
+        }
+        this.term.reset()
+        if (!this.step || this.step >= this.frames.length) {
+            this.step = 0
+        }
+        // this.renderFrame()
+        this.jumpTo(this.step)
+        this.resume()
     }
 
     jumpTo(nextStep) {
-        this._nextTimer.pause()
+        if (this._nextTimer) {
+            this._nextTimer.pause()
+        }
+        this.term.write('\x1bc')
+        if (nextStep > 1) {
+            for (let i = 0; i < nextStep; i++) {
+                this.writeFrame(i);
+            }
+        }
         let currentStep = this.step
         this.step = nextStep
 
@@ -41,6 +61,7 @@ export default class TTYCorePlayer extends EventEmitter {
             1,
             this.speed
         )
+        this._nextTimer.pause()
     }
 
     pause() {
@@ -57,34 +78,40 @@ export default class TTYCorePlayer extends EventEmitter {
         const step = this.step
         const frames = this.frames
         if (!frames) {
-            this.next(null,null)
+            this.next(null, null)
             return;
         }
-        const currentFrame = frames[step]
-        const nextFrame = frames[step + 1]
         try {
-            const str = currentFrame.content
-            var metadata = /^.*\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
-            if (metadata) {
-                // utf8 = metadata[1] === "G";
-                let dimensions = {
-                    rows: +metadata[1],
-                    cols: +metadata[2]
-                };
-                this.term.resize(dimensions.cols, dimensions.rows);
-            }
-            // It seems to be unnecessary and may cause an unexpected behavior.
-            // So I ignore it.
-            else if (str !== '\u001b[?1h\u001b=') {
-                this.term.write(str)
-            }
+            this.writeFrame(step)
 
             this.step = step + 1
         } catch (e) {
             console.log("Error while rendering frame", e);
         }
         this.emit('renderFrame')
-        this.next(currentFrame, nextFrame)
+        this.next(frames[step], frames[step + 1])
+    }
+
+    writeFrame(step) {
+        const frames = this.frames
+        const currentFrame = frames[step]
+        const nextFrame = frames[step + 1]
+
+        const str = currentFrame.content
+        var metadata = /^.*\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
+        if (metadata) {
+            // utf8 = metadata[1] === "G";
+            let dimensions = {
+                rows: +metadata[1],
+                cols: +metadata[2]
+            };
+            this.term.resize(dimensions.cols, dimensions.rows);
+        }
+        // It seems to be unnecessary and may cause an unexpected behavior.
+        // So I ignore it.
+        else if (str !== '\u001b[?1h\u001b=') {
+            this.term.write(str)
+        }
     }
 
     next(currentFrame, nextFrame) {

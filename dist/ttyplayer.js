@@ -110,169 +110,191 @@ return /******/ (function(modules) { // webpackBootstrap
 	var jumping = false;
 
 	var TTYPlayer = function (_Component) {
-	  _inherits(TTYPlayer, _Component);
+	    _inherits(TTYPlayer, _Component);
 
-	  function TTYPlayer(options) {
-	    _classCallCheck(this, TTYPlayer);
+	    function TTYPlayer(options) {
+	        _classCallCheck(this, TTYPlayer);
 
-	    var _this = _possibleConstructorReturn(this, _Component.call(this));
+	        var _this = _possibleConstructorReturn(this, _Component.call(this));
 
-	    var optionsCopy = (0, _utils.assign)({}, options);
-	    optionsCopy.rows = optionsCopy.rows || defaultRows;
-	    optionsCopy.cols = optionsCopy.cols || defaultCols;
-	    optionsCopy.footerStyle = optionsCopy.footerStyle || 'inset';
-	    _this.options = optionsCopy;
+	        var optionsCopy = (0, _utils.assign)({}, options);
+	        optionsCopy.rows = optionsCopy.rows || defaultRows;
+	        optionsCopy.cols = optionsCopy.cols || defaultCols;
+	        optionsCopy.footerStyle = optionsCopy.footerStyle || 'inset';
+	        _this.options = optionsCopy;
 
-	    _this.mount(options.parent);
-	    _this.createCorePlayer();
-	    _this.delegate();
-	    _this.createSpeedSelect();
-	    _this.bindEvent();
+	        _this.mount(options.parent);
+	        _this.createCorePlayer();
+	        _this.delegate();
+	        _this.createSpeedSelect();
+	        _this.bindEvent();
 
-	    _this.set('isPlaying', false);
+	        _this.set('isPlaying', false);
 
-	    return _this;
-	  }
-
-	  TTYPlayer.prototype.onChange = function onChange(key, value) {
-	    if (key === 'isPlaying') {
-	      var _refs = this.refs,
-	          playButton = _refs.playButton,
-	          pauseButton = _refs.pauseButton,
-	          playMask = _refs.playMask;
-
-	      if (value) {
-	        playButton.classList.add(hideClass);
-	        pauseButton.classList.remove(hideClass);
-	        playMask.classList.add(hideClass);
-	      } else {
-	        playButton.classList.remove(hideClass);
-	        pauseButton.classList.add(hideClass);
-	        playMask.classList.remove(hideClass);
-	      }
-	      return;
+	        return _this;
 	    }
-	  };
 
-	  TTYPlayer.prototype.mount = function mount(parentNode) {
-	    var _$ = (0, _utils.element)((0, _utils.replaceTpl)(_player2.default, {
-	      ttyfooter: 'tty-footer-' + this.options.footerStyle
-	    })),
-	        element = _$.element,
-	        refs = _$.refs;
+	    TTYPlayer.prototype.onChange = function onChange(key, value) {
+	        if (key === 'isPlaying') {
+	            this._playing = value;
+	            var _refs = this.refs,
+	                playButton = _refs.playButton,
+	                pauseButton = _refs.pauseButton,
+	                playMask = _refs.playMask;
 
-	    parentNode.appendChild(element);
-	    this.element = element;
-	    this.parentNode = parentNode;
-	    this.options.parent = refs.body;
-	    this.refs = refs;
-	  };
+	            if (value) {
+	                playButton.classList.add(hideClass);
+	                pauseButton.classList.remove(hideClass);
+	                playMask.classList.add(hideClass);
+	            } else {
+	                playButton.classList.remove(hideClass);
+	                pauseButton.classList.add(hideClass);
+	                playMask.classList.remove(hideClass);
+	            }
+	            return;
+	        }
+	    };
 
-	  TTYPlayer.prototype.unmount = function unmount() {
-	    this.parentNode.removeChild(this.element);
-	  };
+	    TTYPlayer.prototype.mount = function mount(parentNode) {
+	        var _$ = (0, _utils.element)((0, _utils.replaceTpl)(_player2.default, {
+	            ttyfooter: 'tty-footer-' + this.options.footerStyle
+	        })),
+	            element = _$.element,
+	            refs = _$.refs;
 
-	  TTYPlayer.prototype.delegate = function delegate() {
-	    var _this2 = this;
+	        parentNode.appendChild(element);
+	        this.element = element;
+	        this.parentNode = parentNode;
+	        this.options.parent = refs.body;
+	        this.refs = refs;
+	    };
 
-	    var player = this.player;['play', 'resume', 'pause'].forEach(function (method) {
-	      _this2[method] = player[method].bind(player);
-	    });
+	    TTYPlayer.prototype.unmount = function unmount() {
+	        this.parentNode.removeChild(this.element);
+	    };
 
-	    this.resumePlay = this.resumePlay.bind(this);
-	  };
+	    TTYPlayer.prototype.delegate = function delegate() {
+	        var _this2 = this;
 
-	  TTYPlayer.prototype.bindEvent = function bindEvent() {
-	    var _this3 = this;
+	        var player = this.player;['play', 'resume', 'pause'].forEach(function (method) {
+	            _this2[method] = player[method].bind(player);
+	        });
 
-	    this.refs.bigPlayButton.addEventListener('click', this.resumePlay);
-	    this.refs.playButton.addEventListener('click', this.resumePlay);
-	    this.refs.pauseButton.addEventListener('click', this.pause);
-	    this.refs.progressBar.addEventListener('change', function (evt) {
-	      if (!jumping) {
-	        jumping = true;
-	        var jumpTo = parseInt(_this3.refs.progressBar.value);
-	        _this3.player.jumpTo(jumpTo);
-	        jumping = false;
-	      }
-	    });
+	        this.resumePlay = this.resumePlay.bind(this);
+	    };
 
-	    this.player.on('renderFrame', function () {
-	      if (!jumping) {
-	        _this3.refs.progressBar.value = _this3.player.step;
-	      }
-	    });
-	    this.player.on('play', function () {
-	      if (_this3.player.frames) {
-	        _this3.refs.progressBar.max = _this3.player.frames.length;
-	      } else {
-	        _this3.refs.progressBar.max = 0;
-	      }
-	      _this3.set('isPlaying', true);
-	    });
+	    TTYPlayer.prototype.bindEvent = function bindEvent() {
+	        var _this3 = this;
 
-	    this.player.on('pause', function () {
-	      _this3.set('isPlaying', false);
-	    });
+	        this.refs.bigPlayButton.addEventListener('click', this.resumePlay);
+	        this.refs.playButton.addEventListener('click', this.resumePlay);
+	        this.refs.pauseButton.addEventListener('click', this.pause);
+	        this.refs.progressBar.addEventListener('mousedown', function (evt) {
+	            jumping = true;
+	        });
+	        this.refs.progressBar.addEventListener('keydown', function (evt) {
+	            jumping = true;
+	        });
+	        this.refs.progressBar.addEventListener('change', function (evt) {
+	            var isPlaying = _this3._playing;
+	            _this3.set('isPlaying', false);
 
-	    this.speedSelect.on('change', function (value) {
-	      _this3.player.speed = value;
-	    });
-	  };
+	            var jumpTo = parseInt(_this3.refs.progressBar.value);
+	            _this3.player.jumpTo(jumpTo);
+	            jumping = false;
+	            if (isPlaying) {
+	                _this3.resumePlay();
+	            }
+	        });
 
-	  TTYPlayer.prototype.unbindEvent = function unbindEvent() {
-	    this.refs.playButton.removeEventListener('click', this.resume);
-	    this.refs.pauseButton.removeEventListener('click', this.pause);
-	  };
+	        this.player.on('renderFrame', function () {
+	            if (!jumping) {
+	                _this3.refs.progressBar.value = _this3.player.step;
+	            }
+	        });
+	        this.player.on('play', function () {
+	            _this3._setupProgressBar();
+	            _this3.set('isPlaying', true);
+	        });
 
-	  TTYPlayer.prototype.createCorePlayer = function createCorePlayer() {
-	    this.player = new _playerCore2.default(this.options);
-	  };
+	        this.player.on('pause', function () {
+	            _this3.set('isPlaying', false);
+	        });
 
-	  TTYPlayer.prototype.createSpeedSelect = function createSpeedSelect() {
-	    this.speedSelect = new _select2.default(this.refs.speedButton, this.refs.speedSelect);
-	  };
+	        this.speedSelect.on('change', function (value) {
+	            _this3.player.speed = value;
+	        });
+	    };
 
-	  TTYPlayer.prototype.resumePlay = function resumePlay() {
-	    if (this._started) {
-	      this.resume();
-	    } else {
-	      this.play(this._frames);
-	      this._started = true;
-	    }
-	  };
+	    TTYPlayer.prototype._setupProgressBar = function _setupProgressBar() {
+	        if (this.player.frames) {
+	            this.refs.progressBar.max = this.player.frames.length;
+	        } else {
+	            this.refs.progressBar.max = 0;
+	        }
+	    };
 
-	  TTYPlayer.prototype.load = function load(url) {
-	    var _this4 = this;
+	    TTYPlayer.prototype.unbindEvent = function unbindEvent() {
+	        this.refs.playButton.removeEventListener('click', this.resume);
+	        this.refs.pauseButton.removeEventListener('click', this.pause);
+	    };
 
-	    (0, _utils.fetchArrayBuffer)(url, function (err, data) {
-	      if (err) {
-	        return _this4.emit('loadError', err);
-	      }
-	      var frames = void 0;
-	      try {
-	        frames = (0, _decode2.default)(data);
-	      } catch (err) {
-	        console.error(err);
-	        return _this4.emit('loadError', err);
-	      }
+	    TTYPlayer.prototype.createCorePlayer = function createCorePlayer() {
+	        this.player = new _playerCore2.default(this.options);
+	    };
 
-	      _this4._frames = frames;
-	      if (_this4.options.autoplay) {
-	        _this4.play();
-	      }
-	    });
-	  };
+	    TTYPlayer.prototype.createSpeedSelect = function createSpeedSelect() {
+	        this.speedSelect = new _select2.default(this.refs.speedButton, this.refs.speedSelect);
+	    };
 
-	  TTYPlayer.prototype.destroy = function destroy() {
-	    this.player.destroy();
-	    this.speedSelect.destroy();
-	    this.unbindEvent();
-	    this.removeAllListeners();
-	    this.unmount();
-	  };
+	    TTYPlayer.prototype.resumePlay = function resumePlay() {
+	        if (this._started) {
+	            this.resume();
+	        } else {
+	            this.play(this._frames);
+	            this._started = true;
+	        }
+	    };
 
-	  return TTYPlayer;
+	    TTYPlayer.prototype.beforePlay = function beforePlay() {
+	        this.player.preparePlayer(this._frames);
+	        this._setupProgressBar();
+	        this.refs.progressBar.value = 0;
+	    };
+
+	    TTYPlayer.prototype.load = function load(url) {
+	        var _this4 = this;
+
+	        (0, _utils.fetchArrayBuffer)(url, function (err, data) {
+	            if (err) {
+	                return _this4.emit('loadError', err);
+	            }
+	            var frames = void 0;
+	            try {
+	                frames = (0, _decode2.default)(data);
+	            } catch (err) {
+	                console.error(err);
+	                return _this4.emit('loadError', err);
+	            }
+
+	            _this4._frames = frames;
+	            if (_this4.options.autoplay) {
+	                _this4.play();
+	            } else {
+	                _this4.beforePlay();
+	            }
+	        });
+	    };
+
+	    TTYPlayer.prototype.destroy = function destroy() {
+	        this.player.destroy();
+	        this.speedSelect.destroy();
+	        this.unbindEvent();
+	        this.removeAllListeners();
+	        this.unmount();
+	    };
+
+	    return TTYPlayer;
 	}(_component2.default);
 
 	exports.default = TTYPlayer;
@@ -338,20 +360,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.step === this.frames.length;
 	    };
 
-	    TTYCorePlayer.prototype.play = function play(frames) {
+	    TTYCorePlayer.prototype.preparePlayer = function preparePlayer(frames) {
 	        if (frames) {
 	            this.frames = frames;
 	        }
 	        this.term.reset();
 	        this.step = 0;
-	        this.renderFrame();
-	        this.emit('play');
+	        this.writeFrame(0);
+	    };
+
+	    TTYCorePlayer.prototype.play = function play(frames) {
+	        if (frames) {
+	            this.frames = frames;
+	        }
+	        this.term.reset();
+	        if (!this.step || this.step >= this.frames.length) {
+	            this.step = 0;
+	        }
+	        // this.renderFrame()
+	        this.jumpTo(this.step);
+	        this.resume();
 	    };
 
 	    TTYCorePlayer.prototype.jumpTo = function jumpTo(nextStep) {
 	        var _this2 = this;
 
-	        this._nextTimer.pause();
+	        if (this._nextTimer) {
+	            this._nextTimer.pause();
+	        }
+	        this.term.write('\x1bc');
+	        if (nextStep > 1) {
+	            for (var i = 0; i < nextStep; i++) {
+	                this.writeFrame(i);
+	            }
+	        }
 	        var currentStep = this.step;
 	        this.step = nextStep;
 
@@ -361,6 +403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._nextTimer = new _timer2.default(function (_) {
 	            return _this2.renderFrame();
 	        }, 1, this.speed);
+	        this._nextTimer.pause();
 	    };
 
 	    TTYCorePlayer.prototype.pause = function pause() {
@@ -380,31 +423,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.next(null, null);
 	            return;
 	        }
-	        var currentFrame = frames[step];
-	        var nextFrame = frames[step + 1];
 	        try {
-	            var str = currentFrame.content;
-	            var metadata = /^.*\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
-	            if (metadata) {
-	                // utf8 = metadata[1] === "G";
-	                var dimensions = {
-	                    rows: +metadata[1],
-	                    cols: +metadata[2]
-	                };
-	                this.term.resize(dimensions.cols, dimensions.rows);
-	            }
-	            // It seems to be unnecessary and may cause an unexpected behavior.
-	            // So I ignore it.
-	            else if (str !== '\x1B[?1h\x1B=') {
-	                    this.term.write(str);
-	                }
+	            this.writeFrame(step);
 
 	            this.step = step + 1;
 	        } catch (e) {
 	            console.log("Error while rendering frame", e);
 	        }
 	        this.emit('renderFrame');
-	        this.next(currentFrame, nextFrame);
+	        this.next(frames[step], frames[step + 1]);
+	    };
+
+	    TTYCorePlayer.prototype.writeFrame = function writeFrame(step) {
+	        var frames = this.frames;
+	        var currentFrame = frames[step];
+	        var nextFrame = frames[step + 1];
+
+	        var str = currentFrame.content;
+	        var metadata = /^.*\x1b\[8;([0-9]+);([0-9]+)t$/.exec(str);
+	        if (metadata) {
+	            // utf8 = metadata[1] === "G";
+	            var dimensions = {
+	                rows: +metadata[1],
+	                cols: +metadata[2]
+	            };
+	            this.term.resize(dimensions.cols, dimensions.rows);
+	        }
+	        // It seems to be unnecessary and may cause an unexpected behavior.
+	        // So I ignore it.
+	        else if (str !== '\x1B[?1h\x1B=') {
+	                this.term.write(str);
+	            }
 	    };
 
 	    TTYCorePlayer.prototype.next = function next(currentFrame, nextFrame) {
