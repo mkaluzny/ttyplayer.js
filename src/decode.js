@@ -17,6 +17,9 @@ export default function decode(arrayBuffer) {
     let length = data.getUint32(offset, true)
     offset += 4
 
+    if (offset+length > size) {
+      length = size-offset;
+    }
     frames.push({
       time: sec * 1000 + usec / 1000,
       content: readUtf8(arrayBuffer, offset, length)
