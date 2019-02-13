@@ -6133,22 +6133,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var data = new DataView(arrayBuffer);
 
 	  while (offset < size) {
-	    var sec = data.getUint32(offset, true);
-	    offset += 4;
-	    var usec = data.getUint32(offset, true);
-	    offset += 4;
-	    var length = data.getUint32(offset, true);
-	    offset += 4;
+	    try {
+	      var sec = data.getUint32(offset, true);
+	      offset += 4;
+	      var usec = data.getUint32(offset, true);
+	      offset += 4;
+	      var length = data.getUint32(offset, true);
+	      offset += 4;
 
-	    if (offset + length > size) {
-	      length = size - offset;
+	      if (offset + length > size) {
+	        length = size - offset;
+	      }
+	      frames.push({
+	        time: sec * 1000 + usec / 1000,
+	        content: (0, _utils.readUtf8)(arrayBuffer, offset, length)
+	      });
+
+	      offset += length;
+	    } catch (e) {
+	      break;
 	    }
-	    frames.push({
-	      time: sec * 1000 + usec / 1000,
-	      content: (0, _utils.readUtf8)(arrayBuffer, offset, length)
-	    });
-
-	    offset += length;
 	  }
 
 	  return frames;

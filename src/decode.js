@@ -10,22 +10,26 @@ export default function decode(arrayBuffer) {
   const data = new DataView(arrayBuffer)
 
   while (offset < size) {
-    let sec = data.getUint32(offset, true)
-    offset += 4
-    let usec = data.getUint32(offset, true)
-    offset += 4
-    let length = data.getUint32(offset, true)
-    offset += 4
+    try {
+      let sec = data.getUint32(offset, true)
+      offset += 4
+      let usec = data.getUint32(offset, true)
+      offset += 4
+      let length = data.getUint32(offset, true)
+      offset += 4
 
-    if (offset+length > size) {
-      length = size-offset;
+      if (offset + length > size) {
+        length = size - offset;
+      }
+      frames.push({
+        time: sec * 1000 + usec / 1000,
+        content: readUtf8(arrayBuffer, offset, length)
+      })
+
+      offset += length
+    } catch (e) {
+      break;
     }
-    frames.push({
-      time: sec * 1000 + usec / 1000,
-      content: readUtf8(arrayBuffer, offset, length)
-    })
-
-    offset += length
   }
 
   return frames
