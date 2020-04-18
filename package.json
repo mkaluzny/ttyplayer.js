@@ -28,5 +28,6 @@
     "uglify-js": "^2.7.3",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.15.0"
-  }
+  },
+  "types": "index.d.ts"
 }
